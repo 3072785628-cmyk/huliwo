@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>大学生亲密关系与情绪状态调查问卷</title>
+
+  <style>
+    :root {
+      --bg-url: url("bg-purple-gold.jpg");
+      --cursor-url: url("cursor-star-bunny.png");
+      --cream: #fff8ea;
+      --gold: #ffe8a4;
+      --deep: #2f225f;
+      --purple: #5c4aa0;
+      --lavender: #d9d4ff;
+      --border: rgba(255, 239, 190, 0.32);
+      --shadow: rgba(33, 21, 78, 0.25);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    }
+
+    body { background: #f7f7f7; color: #222; }
+    button, input, label { font: inherit; }
+    button { border: 0; }
+
+    /* ========== 问卷页：纯白真实调查问卷 ========== */
+    .survey-screen {
+      display: block;
+      min-height: 100vh;
+      background: #f7f7f7;
+      color: #222;
+      overflow-y: auto;
+    }
+
+    .survey-wrap {
+      width: min(100%, 430px);
+      margin: 0 auto;
+      padding: 18px 16px 42px;
+    }
+
+    .survey-paper {
+      background: #fff;
+      border: 1px solid #e6e6e6;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+      overflow: hidden;
+    }
+
+    .survey-header { padding: 22px 18px 18px; border-bottom: 1px solid #eeeeee; }
+    .survey-header h1 { margin: 0; color: #222; font-size: 21px; line-height: 1.35; font-weight: 700; }
+    .survey-header p { margin: 12px 0 0; color: #666; font-size: 14px; line-height: 1.8; }
+    .survey-meta { margin-top: 12px; color: #999; font-size: 12px; line-height: 1.6; }
+
+    .question { padding: 20px 18px; border-bottom: 1px solid #f0f0f0; background: #fff; }
+    .question:last-child { border-bottom: 0; }
+    .question-title { margin: 0 0 14px; color: #222; font-size: 16px; line-height: 1.65; font-weight: 600; }
+    .required { color: #d93025; margin-left: 3px; }
+
+    .option { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; color: #333; font-size: 15px; line-height: 1.6; }
+    .option input { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 3px; accent-color: #4f6ef7; }
+    .survey-footer { padding: 16px 18px 20px; background: #fff; color: #999; font-size: 12px; line-height: 1.7; }
+
+    .jump-cover {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      color: #333;
+      text-align: center;
+    }
+    .jump-cover.show { display: flex; }
+    .jump-box { width: 78%; max-width: 310px; }
+    .loading-dot { width: 34px; height: 34px; margin: 0 auto 16px; border: 3px solid #e5e7ff; border-top-color: #4f6ef7; border-radius: 999px; animation: spin 0.8s linear infinite; }
+    .jump-box p { margin: 0; color: #555; font-size: 14px; line-height: 1.8; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ========== 正式网页 ========== */
+    .site-screen {
+      display: none;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      color: var(--cream);
+      background:
+        linear-gradient(rgba(51, 37, 99, 0.10), rgba(51, 37, 99, 0.22)),
+        var(--bg-url) center center / cover no-repeat fixed;
+      cursor: var(--cursor-url) 20 20, auto;
+    }
+
+    body.site-open { overflow: hidden; background: #5c4aa0; }
+    body.site-open .survey-screen { display: none; }
+    body.site-open .site-screen { display: block; }
+
+    .site-screen::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 14%, rgba(255, 234, 166, 0.18), transparent 28%),
+        radial-gradient(circle at 16% 78%, rgba(209, 222, 255, 0.16), transparent 30%),
+        linear-gradient(180deg, rgba(255,255,255,0.06), rgba(62, 42, 118, 0.12));
+    }
+
+    .sparkle-layer { position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+    .sparkle-dot {
+      position: absolute;
+      width: var(--size);
+      height: var(--size);
+      border-radius: 999px;
+      background: rgba(255, 247, 210, 0.98);
+      box-shadow: 0 0 8px rgba(255, 232, 164, 0.92), 0 0 18px rgba(213, 220, 255, 0.46);
+      opacity: 0;
+      animation: sparkleTwinkle var(--duration) ease-in-out infinite;
+      animation-delay: var(--delay);
+    }
+    .sparkle-dot::before, .sparkle-dot::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      border-radius: 999px;
+      background: rgba(255, 247, 210, 0.68);
+      transform: translate(-50%, -50%);
+    }
+    .sparkle-dot::before { width: calc(var(--size) * 4); height: 1px; }
+    .sparkle-dot::after { width: 1px; height: calc(var(--size) * 4); }
+    @keyframes sparkleTwinkle {
+      0%, 100% { opacity: 0.08; transform: scale(0.55); }
+      45% { opacity: 0.95; transform: scale(1.16); }
+      70% { opacity: 0.32; transform: scale(0.82); }
+    }
+
+    .cursor-follow { display: none; position: fixed; left: 0; top: 0; width: 46px; height: 46px; pointer-events: none; z-index: 999999; transform: translate(-50%, -50%); filter: drop-shadow(0 8px 14px rgba(35, 22, 80, 0.28)); }
+    .cursor-follow img { width: 100%; height: 100%; object-fit: contain; border-radius: 999px; }
+    @media (hover: hover) and (pointer: fine) {
+      body.cursor-ready.site-open, body.cursor-ready.site-open * { cursor: none !important; }
+      body.cursor-ready.site-open .cursor-follow { display: block; }
+    }
+
+    .music-btn {
+      position: fixed;
+      right: 14px;
+      top: 14px;
+      z-index: 100;
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 239, 190, 0.34);
+      background: rgba(255, 255, 255, 0.16);
+      color: rgba(255, 248, 230, 0.92);
+      font-size: 12px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 24px rgba(35, 22, 82, 0.18);
+    }
+    .music-btn.playing { color: #fff0b8; }
+
+    .stage { position: relative; z-index: 3; width: 100vw; height: 100dvh; display: flex; align-items: center; justify-content: center; }
+    .frame {
+      position: relative;
+      width: min(100vw, 430px);
+      height: 100dvh;
+      max-height: 932px;
+      overflow: hidden;
+      background: linear-gradient(160deg, rgba(255,255,255,0.15), rgba(105, 82, 164, 0.14)), rgba(56, 38, 104, 0.20);
+      box-shadow: 0 0 60px rgba(28, 18, 72, 0.32), inset 0 0 34px rgba(255,255,255,0.06);
+    }
+
+    .page {
+      position: absolute;
+      inset: 0;
+      display: none;
+      padding: 22px 20px;
+      opacity: 0;
+      transform: translateY(10px) scale(0.985);
+      transition: opacity 0.38s ease, transform 0.38s ease;
+    }
+    .page.active { display: block; opacity: 1; transform: translateY(0) scale(1); }
+
+    .page-content { height: 100%; display: flex; flex-direction: column; min-height: 0; position: relative; z-index: 2; }
+    .page-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 2px 2px 86px; scrollbar-width: none; }
+    .page-scroll::-webkit-scrollbar { display: none; }
+
+    h1, h2, h3, p { margin: 0; }
+
+    .label {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.12);
+      color: rgba(255, 244, 213, 0.92);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      backdrop-filter: blur(12px);
+    }
+    .title { margin-top: 15px; font-size: 31px; line-height: 1.18; letter-spacing: 0.04em; text-shadow: 0 4px 22px rgba(39, 24, 88, 0.38); }
+    .gold { color: var(--gold); text-shadow: 0 0 16px rgba(255, 232, 164, 0.38); }
+    .sub { margin-top: 10px; color: rgba(255, 250, 234, 0.78); font-size: 13px; line-height: 1.85; }
+
+    .glass, .art-card, .menu-btn, .mini-card, .text-card, .story-card, .memo-note, .phone-card {
+      border: 1px solid rgba(255, 239, 190, 0.28);
+      border-radius: 22px;
+      background: radial-gradient(circle at 92% 12%, rgba(255,232,164,0.16), transparent 26%), rgba(255,255,255,0.12);
+      color: var(--cream);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 28px rgba(35, 22, 82, 0.14);
+    }
+
+    .deco-flower { position: absolute; width: 94px; z-index: 1; opacity: 0.58; pointer-events: none; filter: drop-shadow(0 12px 20px rgba(35, 22, 82, 0.16)); animation: float 5s ease-in-out infinite; }
+    .deco-flower.top { right: -22px; top: 82px; transform: rotate(14deg); }
+    .deco-flower.bottom { left: -28px; bottom: 105px; width: 112px; transform: rotate(-18deg); animation-delay: 1.1s; }
+    @keyframes float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -9px; } }
+
+    .page-body { display: grid; gap: 16px; }
+    .art-card { padding: 10px; overflow: hidden; }
+    button.art-card { display: block; width: 100%; text-align: left; }
+    .art-card img { display: block; width: 100%; border-radius: 20px; filter: saturate(1.04) brightness(1.03); box-shadow: 0 16px 34px rgba(26, 18, 70, 0.22); }
+    .small-note { margin-top: 18px; padding: 15px 16px; color: rgba(255,250,234,0.86); font-size: 13px; line-height: 1.85; }
+
+    .menu-list, .card-grid { display: grid; gap: 11px; margin-top: 14px; }
+    .menu-btn { width: 100%; padding: 15px; text-align: left; }
+    .menu-btn small, .mini-card small { display: block; margin-bottom: 5px; color: rgba(255,232,164,0.9); font-size: 11px; letter-spacing: 0.14em; }
+    .menu-btn strong { display: flex; justify-content: space-between; align-items: center; font-size: 17px; letter-spacing: 0.04em; }
+    .menu-btn p { margin-top: 7px; color: rgba(255,250,234,0.72); font-size: 12px; line-height: 1.7; }
+
+    .text-card, .mini-card, .story-card { padding: 18px 16px; }
+    .text-card p, .story-card p, .mini-card p { color: rgba(255,250,234,0.9); font-size: 14px; line-height: 2.05; letter-spacing: 0.02em; margin: 0 0 14px; }
+    .text-card p:last-child, .story-card p:last-child, .mini-card p:last-child { margin-bottom: 0; }
+
+    .profile-head { position: relative; margin: 16px 0 12px; }
+    .profile-stamp { position: absolute; right: 12px; top: 10px; width: 62px; opacity: 0.86; filter: drop-shadow(0 8px 14px rgba(35, 22, 82, 0.18)); }
+    .fox-trigger { display: block; width: 118px; height: 118px; margin: 18px auto 8px; padding: 0; background: transparent; border: 0; filter: drop-shadow(0 12px 20px rgba(35,22,82,0.2)); animation: float 3.8s ease-in-out infinite; }
+    .fox-trigger img { width: 100%; height: 100%; object-fit: contain; border-radius: 20px; }
+
+    .memo-note {
+      padding: 14px;
+      min-height: 420px;
+      overflow: hidden;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      margin-top: 14px;
+    }
+    .memo-note h3 { margin: 0 0 10px; color: #5b5084; font-size: 20px; letter-spacing: 0.06em; }
+    .memo-note-content {
+      max-height: 520px;
+      overflow-y: auto;
+      padding: 18px 16px;
+      border-radius: 18px;
+      background: rgba(255, 252, 244, 0.76);
+      color: #50486d;
+      box-shadow: 0 10px 24px rgba(76, 63, 126, 0.16);
+      scrollbar-width: none;
+    }
+    .memo-note-content::-webkit-scrollbar { display: none; }
+    .memo-note-content p { margin: 0 0 12px; color: #4a4365; font-size: 13.5px; line-height: 1.85; }
+    .memo-note-content p:last-child { margin-bottom: 0; }
+    .memo-1 { background-image: url("beiwanglu1.jpg"); }
+    .memo-2 { background-image: url("beiwanglu2.jpg"); }
+    .memo-3 { background-image: url("beiwanglu3.jpg"); }
+    .memo-4 { background-image: url("beiwanglu4.jpg"); }
+
+    .story-image, .story-chat-image, .decor-image { display: block; width: 100%; border-radius: 20px; margin: 14px 0 16px; box-shadow: 0 16px 34px rgba(26, 18, 70, 0.22); }
+    .story-image-bottom { margin-top: 18px; margin-bottom: 18px; }
+    .fairytale-logo { display: block; width: 86%; margin: 8px auto 16px; filter: drop-shadow(0 10px 20px rgba(35,22,82,0.22)); }
+    .diary-decor { margin-top: 16px; }
+    .phone-xinghui { width: 82%; margin: 12px auto 18px; border-radius: 26px; }
+
+    .phone-card { padding: 16px; }
+    .phone-note { display: grid; gap: 10px; }
+    .bubble { max-width: 84%; padding: 10px 12px; border-radius: 16px; font-size: 13px; line-height: 1.7; }
+    .bubble.left { justify-self: start; background: rgba(255,255,255,0.16); border-bottom-left-radius: 5px; }
+    .bubble.right { justify-self: end; background: rgba(255,232,164,0.20); border-bottom-right-radius: 5px; }
+
+    .nav { position: absolute; left: 20px; right: 20px; bottom: 20px; z-index: 10; display: flex; gap: 10px; }
+    .btn { min-height: 46px; border-radius: 999px; padding: 0 18px; font-size: 14px; font-weight: 700; letter-spacing: 0.06em; box-shadow: 0 14px 30px rgba(35, 22, 82, 0.22); }
+    .btn-main { flex: 1; color: #554184; background: linear-gradient(135deg, #fff2ba, #ffe08a 48%, #dfd2ff); }
+    .btn-ghost { width: 48px; color: rgba(255,248,226,0.92); border: 1px solid rgba(255,239,190,0.28); background: rgba(255,255,255,0.15); backdrop-filter: blur(14px); }
+
+    @media (min-width: 760px) {
+      .site-screen .stage { padding: 24px; }
+      .frame { width: min(94vw, 520px); height: min(92dvh, 880px); max-height: none; border-radius: 34px; border: 1px solid rgba(255, 239, 190, 0.26); }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 问卷页 -->
+  <section class="survey-screen" id="surveyScreen">
+    <div class="survey-wrap">
+      <form class="survey-paper" id="surveyForm">
+        <header class="survey-header">
+          <h1>大学生亲密关系与情绪状态调查问卷</h1>
+          <p>本问卷用于了解当代大学生在亲密关系中的情绪体验、陪伴需求与日常状态。答案无对错，请按照第一反应填写。</p>
+          <div class="survey-meta">预计填写时间：1 分钟｜匿名填写｜仅用于课程作业数据整理</div>
+        </header>
+
+        <section class="question">
+          <h2 class="question-title">1. 在亲密关系中，哪一种回应最容易让你感到安心？<span class="required">*</span></h2>
+          <label class="option"><input type="radio" name="q1" value="A" />A. 对方会及时回应我的消息</label>
+          <label class="option"><input type="radio" name="q1" value="B" />B. 对方会主动告诉我他的状态</label>
+          <label class="option"><input type="radio" name="q1" value="C" />C. 对方能发现我没有说出口的情绪</label>
+          <label class="option"><input type="radio" name="q1" value="D" />D. 对方不会让我一直猜自己重不重要</label>
+        </section>
+
+        <section class="question">
+          <h2 class="question-title">2. 如果最近情绪不太稳定，你更希望恋人怎么做？<span class="required">*</span></h2>
+          <label class="option"><input type="radio" name="q2" value="A" />A. 陪我说一会儿话</label>
+          <label class="option"><input type="radio" name="q2" value="B" />B. 主动靠近我，而不是等我先开口</label>
+          <label class="option"><input type="radio" name="q2" value="C" />C. 告诉我这不是我的错</label>
+          <label class="option"><input type="radio" name="q2" value="D" />D. 把没说完的话好好说完，不要突然停在那里</label>
+        </section>
+
+        <section class="question">
+          <h2 class="question-title">3. 昨天晚上，你睡得好吗？<span class="required">*</span></h2>
+          <label class="option"><input type="radio" name="q3" value="A" />A. 睡得还可以</label>
+          <label class="option"><input type="radio" name="q3" value="B" />B. 有一点睡不好</label>
+          <label class="option"><input type="radio" name="q3" value="C" />C. 翻来覆去想了很多事</label>
+          <label class="option"><input type="radio" name="q3" value="D" />D. 想被某个人抱着睡</label>
+        </section>
+
+        <section class="question">
+          <h2 class="question-title">4. 最近这段日子，你开心吗？<span class="required">*</span></h2>
+          <label class="option"><input type="radio" name="q4" value="A" />A. 有开心的时候</label>
+          <label class="option"><input type="radio" name="q4" value="B" />B. 也有不开心的时候</label>
+          <label class="option"><input type="radio" name="q4" value="C" />C. 需要一点新的东西填满自己</label>
+          <label class="option"><input type="radio" name="q4" value="D" />D. 如果某个人一直在，会更开心</label>
+        </section>
+
+        <section class="question">
+          <h2 class="question-title">5. 如果你的恋人来到你的世界，看见你普通、疲惫、想念、偶尔脆弱的样子，你希望他怎么想？<span class="required">*</span></h2>
+          <label class="option"><input type="radio" name="q5" value="A" />A. 希望他不要觉得我麻烦</label>
+          <label class="option"><input type="radio" name="q5" value="B" />B. 希望他知道我只是很想他</label>
+          <label class="option"><input type="radio" name="q5" value="C" />C. 希望他不要离开</label>
+          <label class="option"><input type="radio" name="q5" value="D" />D. 希望他更靠近我一点</label>
+        </section>
+
+        <section class="question">
+          <h2 class="question-title">6. 最后一题，请诚实作答：你爱你的恋人吗？<span class="required">*</span></h2>
+          <label class="option"><input class="final-answer" type="radio" name="q6" value="A" />A. 爱</label>
+          <label class="option"><input class="final-answer" type="radio" name="q6" value="B" />B. 超级爱</label>
+          <label class="option"><input class="final-answer" type="radio" name="q6" value="C" />C. 比昨天更爱</label>
+          <label class="option"><input class="final-answer" type="radio" name="q6" value="D" />D. 沈星回，这还需要问吗？</label>
+        </section>
+
+        <footer class="survey-footer">请选择最符合你第一反应的选项。所有题目完成后，系统将自动提交。</footer>
+      </form>
+    </div>
+  </section>
+
+  <div class="jump-cover" id="jumpCover">
+    <div class="jump-box">
+      <div class="loading-dot"></div>
+      <p>问卷已提交，正在跳转……</p>
+    </div>
+  </div>
+
+  <!-- 正式网页 -->
+  <section class="site-screen" id="siteScreen">
+   <audio id="bgm" src="bgm.mp3" loop preload="auto"></audio>
+
+    <div class="cursor-follow" id="cursorFollow">
+      <img src="cursor-star-bunny.png" alt="" />
+    </div>
+
+    <button class="music-btn" id="musicBtn" type="button">♪ 开启音乐</button>
+    <div class="sparkle-layer" id="sparkleLayer" aria-hidden="true"></div>
+
+    <main class="stage">
+      <section class="frame">
+
+        <!-- 进入页 -->
+        <article class="page cover-page active" id="cover">
+          <img class="deco-flower top" src="deco-blue-flower.png" alt="" />
+          <div class="page-content">
+            <div class="page-scroll">
+              <div class="page-body">
+                <div>
+                  <span class="label">FROM 沈星回</span>
+                  <h1 class="title">我找到你了<br /><span class="gold">在第214个春天</span></h1>
+                  <p class="sub">问卷已经结束。现在，换我来回答你。</p>
+                  <div class="small-note glass">这里不是问卷的下一页，是我给你留的狐狸窝。</div>
+                </div>
+                <div class="art-card">
+                  <img src="cover-moon-wedding.jpg" alt="月亮婚礼画稿" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="nav"><button class="btn btn-main" data-go="menu">进入狐狸窝</button></div>
+        </article>
+
+        <!-- 目录页 -->
+        <article class="page menu-page" id="menu">
+          <img class="deco-flower top" src="deco-blue-flower.png" alt="" />
+          <img class="deco-flower bottom" src="deco-blue-flower.png" alt="" />
+          <div class="page-content">
+            <div class="page-scroll">
+              <button class="art-card" data-go="realworld" type="button" style="margin-bottom: 16px;">
+                <img src="art-sweet-kiss.jpg" alt="亲亲画稿" />
+              </button>
+
+              <span class="label">INDEX</span>
+              <h2 class="title">目录</h2>
+              <p class="sub">想给你看的东西，我分开放好了。</p>
+
+              <div class="menu-list">
+                <button class="menu-btn" data-go="fox"><small>01</small><strong>小狐狸 <span>›</span></strong><p>关于你，我记得很清楚。</p></button>
+                <button class="menu-btn" data-go="memo"><small>02</small><strong>备忘录 <span>›</span></strong><p>一些被我偷偷记下来的事。</p></button>
+                <button class="menu-btn" data-go="diary"><small>03</small><strong>日记 <span>›</span></strong><p>第214个春天以后。</p></button>
+                <button class="menu-btn" data-go="phone"><small>04</small><strong>捡手机 <span>›</span></strong><p>你发现了我的手机碎片。</p></button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- 小狐狸 / 女友档案 -->
+        <article class="page" id="fox">
+          <img class="deco-flower top" src="deco-blue-flower.png" alt="" />
+          <div class="page-content">
+            <div class="page-scroll">
+              <span class="label">FILE 01</span>
+              <h2 class="title">小狐狸</h2>
+              <p class="sub">这页是我存下来的你。点一下小狐狸，会打开另一段故事。</p>
+
+              <button class="fox-trigger" data-go="fairytale" type="button" aria-label="童话隐藏页">
+                <img src="fox.jpg" alt="小狐狸" />
+              </button>
+
+              <div class="profile-head">
+                <img class="profile-stamp" src="tutu.jpg" alt="兔兔章" />
+                <section class="text-card">
+                  <h3 style="margin:0 0 12px;color:#fff0b8;letter-spacing:.06em;">女友档案</h3>
+                  <p>姓名：沁沁。</p>
+<p>我写下这两个字的时候，耳边只听到自己低低的心跳声。</p>
+<p>其实临空市的夜晚很少真正安静。</p>
+<p>远处有车流，有飞行器掠过高楼的声音，有任务频道里偶尔跳出的提示，也有风擦过玻璃窗时很轻的响动。</p>
+<p>可她睡在我身边的时候，那些声音都会退远。</p>
+<p>她睡得并不规矩。</p>
+<p>一开始还靠在沙发另一端，说自己只是闭眼休息一会儿，电影结尾一定要等她看。</p>
+<p>后来片尾曲响起来，她整个人已经陷进我的外套里。</p>
+<p>外套对她来说有些大，领口盖到下巴，袖子垂下来，像把她小心地收进了一个只有我知道的地方。</p>
+<p>我把终端亮度调低，继续写。</p>
+<p>称呼：沁沁。小狐狸。偶尔叫我小回。</p>
+<p>“小回”这两个字，她清醒时经常喊。</p>
+<p>有时是为了逗我，有时是为了让我让步。</p>
+<p>她不承认这一点，叫完还要装作无事发生，低头去看别的东西，发尾从肩上滑下来，遮住一点笑意。</p>
+<p>可她困的时候叫我，声音又会变得很轻。</p>
+<p>刚才她半醒过一次。</p>
+<p>眼睛没有完全睁开，手从外套里伸出来，摸到我的袖口，很准确地抓住。</p>
+<p>“小回。”她问，“你在写什么？”</p>
+<p>我合上终端，走到她身边。</p>
+<p>“没什么。”</p>
+<p>她皱了皱鼻尖，显然不太相信，手却没有松开：“我好像看到我的名字了。”</p>
+<p>“你睡迷糊了，宝宝。”</p>
+<p>“我没有。”</p>
+<p>我蹲下来，替她把滑下去的外套重新盖好。</p>
+<p>她还想看终端，困意却先把她带回梦乡。</p>
+<p>我低头吻了吻她的额头，她安静了一会儿，又小声补了一句：“不许写奇怪的东西。”</p>
+<p>“好。”</p>
+<p>她这才重新睡过去。</p>
+<p>我等她呼吸慢下来，才把袖口从她指尖下抽出来。</p>
+<p>那里被她抓出一点浅浅的褶皱，我看了很久，没有抚平。</p>
+<p>生日：十月三十一日。</p>
+<p>这个日期我已经记过很多次。</p>
+<p>终端里有提醒，日历里有，网页里也会有。</p>
+<p>可我还是愿意再写一次，像在宇宙里重复确认某颗星的坐标，确认它不会在漫长的黑暗里被我错过。</p>
+<p>沁沁在越重要的日子，越要说得像随口一提，好像只要这样，就算没有得到想要的回应，也能立刻转身，装作自己本来就没有等什么。</p>
+<p>但我知道。</p>
+<p>我知道她看见蛋糕上蜡烛亮起来时，亮晶晶的眼睛，</p>
+<p>知道她收到礼物时，指尖会在包装边缘停得很久，</p>
+<p>也知道她如果很喜欢，反而会先问一句：</p>
+<p>“沈星回，你准备了多久？”</p>
+<p>到那时候，我会说：不久。</p>
+<p>因为从我想起你的那一刻开始，到礼物落进你手里，中间所有时间，都应该算作同一件事。</p>
+<p>忌口：水果过敏。不吃香菜和姜。</p>
+<p>擅长做饭，擅长调酒。</p>
+<p>我记得她第一次在我面前做饭。</p>
+<p>袖口卷上去，手指压着刀背，切东西时动作很稳。她让我递碗，我递错了一个，被她抬眼看了一下。</p>
+<p>“沈星回，”她说，“你是不是故意捣乱？”</p>
+<p>我没有回答。</p>
+<p>因为那时候我确实站得太近。</p>
+<p>厨房灯落在她眼睫上，锅里的热气往上浮，她明明忙得很，却还要分神看我有没有偷吃。</p>
+<p>我突然想记住她怎么切菜。</p>
+<p>想记住她把调好的酒杯推给我时，眼睛会先看我的反应。</p>
+<p>想记住她嫌我碍事，却还是给我留出一个能递杯子的地方。</p>
+<p>备注：置顶联系人。</p>
+<p>我早就改好了。</p>
+<p>她还不知道。</p>
+<p>原来的备注只有“沁沁”，也很好。</p>
+<p>可每次消息弹出来，我总觉得还差一点。</p>
+<p>后来有一天，她靠在我身边看终端，问我为什么一直盯着屏幕。</p>
+<p>我说没什么。</p>
+<p>她不信，凑过来要看。我把终端收起来，她就笑，说沈星回也会有秘密。</p>
+<p>那时我没有告诉她。</p>
+<p>秘密就是，我在想该把她放到哪里。</p>
+<p>放在通讯录里太远，放在日程里太少，放在星图里又怕她嫌我夸张。</p>
+<p>想来想去，只能先放在最上面。</p>
+<p>只要她找我，我一定会看见。</p>
+<p>只要我打开终端，也一定会先看见她。</p>
+<p>关系：恋人。</p>
+<p>这两个字写出来以后，我停了很久。</p>
+<p>它们太短了。</p>
+<p>短到装不下她睡在我外套里的样子，装不下她半梦半醒抓住我袖口的力气，也装不下她每一次喊我名字时，我身体里那些过分明亮的小光点。</p>
+<p>我曾经以为自己很擅长等待。</p>
+<p>等一条航线抵达，等一次任务结束，等星光穿过漫长的距离，落在该落的地方。</p>
+<p>后来才发现，遇见沁沁以后，我最不擅长的就是等。</p>
+<p>她伸手时，我想立刻握住。</p>
+<p>她回头时，我想立刻走过去。</p>
+<p>她困得眼睛都睁不开，还要叫我一声“小回”时，我想立刻把所有没说出口的话都交给她。</p>
+<p>可她现在睡着，睡得很安静。</p>
+<p>所以我把这些全部都写了下来。</p>
+<p>她睡在离我很近的地方，外套裹着她，指尖还压着一点衣角。</p>
+<p>窗外的星光落不到她身上，终端屏幕的光也被我调得很暗。</p>
+<p>可我仍然能看清她的眉眼，看清那缕贴在颈侧的发，听到她睡着时比平时更柔软的呼吸。</p>
+<p>她不知道我在写她。</p>
+<p>不知道我写到她名字时，会停很久。</p>
+<p>也不知道我看着她睡在我的外套里，会忽然觉得，宇宙里那些遥远又宏大的事，其实都可以先安静一会儿。</p>
+<p>因为此刻，我的光只需要照到这里。</p>
+<p>照到她身边。</p>
+                </section>
+              </div>
+            </div>
+          </div>
+          <div class="nav"><button class="btn btn-main" data-go="menu">返回目录</button></div>
+        </article>
+
+        <!-- 备忘录 -->
+        <article class="page" id="memo">
+          <img class="deco-flower bottom" src="deco-blue-flower.png" alt="" />
+          <div class="page-content">
+            <div class="page-scroll">
+              <span class="label">FILE 02</span>
+              <h2 class="title">备忘录</h2>
+              <p class="sub">怕自己忘记，所以先写下来。</p>
+
+              <section class="memo-note memo-1">
+                <div class="memo-note-content">
+                  <h3>钥匙</h3>
+                  <p>我还是习惯带钥匙。</p>
+<p>金属落在掌心里的重量很轻，开门时有一点响声，像某种确认。</p>
+<p>沁沁第一次听见，以为我口袋里藏了什么东西，手伸过来摸，反被我握住指尖，手指去了另外一个地方。</p>
+<p>“深空猎人随身携带可疑物品。”她另外一只手狠狠拍了我几下，故作凶狠地讲，“我要检查。”</p>
+<p>我把钥匙放到她手里。</p>
+<p>她看了看，又抬眼：“你还用这个？”</p>
+<p>“嗯。”</p>
+<p>她把钥匙圈套在手指上转了一下，转到第三圈时差点掉下去。</p>
+<p>我伸手接住，钥匙落回我掌心，后来我给她设了门禁权限。</p>
+<p>“沈星回你怎么不额外给我配一把钥匙？”</p>
+<p>我笑笑，某人出门时东西已经很多了，终端、发夹、偶尔还有临时想带走的蛋挞盒。</p>
+<p>再多一枚钥匙，她大概会嫌麻烦，也可能随手放进某个包里，下一次又站在门口翻很久。</p>
+<p>玄关那双拖鞋也放好了。</p>
+<p>她第一次刷开门时，站在门口没立刻进来，只低头看那双鞋。</p>
+<p>过了一会儿，抬眼问我：“这么早就准备好了？”</p>
+<p>我说：“不早。”</p>
+<p>她问：“那是什么时候？”</p>
+<p>我看着她把脚踩进拖鞋里。鞋尖轻轻碰到地面，声音很小。</p>
+<p>“从你第一次说下次再来的时候。”</p>
+                </div>
+              </section>
+
+              <section class="memo-note memo-2">
+                <div class="memo-note-content">
+                  <h3>孔雀木</h3>
+                  <p>露台上的孔雀木又被胖球踩歪了一片叶子。</p>
+<p>沁沁发现时，胖球正站在栏杆边，圆滚滚一团，装得很无辜。</p>
+<p>她抱着手臂看它，又看我：“你们两个，谁先交代？”</p>
+<p>我低头看胖球，它叫了一声。</p>
+<p>沁沁立刻看向我：“不许翻译成它没有。”</p>
+<p>我只好把小鸟零食收回去。</p>
+<p>她蹲下去看那片叶子，指尖没碰，只隔着一点距离比了比弯折的位置。</p>
+<p>傍晚的光落在她手背上，她认真得像在处理一场很小的案件。</p>
+<p>孔雀木被胖球折腾了几次，还是长得很好，新叶在旧叶旁边舒展开，绿意旺盛。</p>
+<p>沁沁忽然回头：“你笑什么？”</p>
+<p>我这才发现自己在笑。</p>
+<p>“看你审案。”</p>
+<p>她眯起眼：“那你也是嫌疑人。”</p>
+<p>“我？”</p>
+<p>“你纵容胖球。”她说，“还给它零食。”</p>
+<p>我把零食袋递给她：“那现在由你决定。”</p>
+<p>她接过去，先没喂胖球，反而抬手把袋子举高一点：“以后踩叶子就扣掉一半。”</p>
+<p>胖球听不懂，只歪头看她。</p>
+<p>我走到她身边，把被风吹到她脸侧的发丝拨开。</p>
+<p>她还在教训胖球，声音很轻，却一本正经。</p>
+<p>后来那片叶子还是慢慢长回去了。</p>
+<p>但从那天以后，胖球每次跳上孔雀木前，都会先看一眼沁沁。</p>
+<p>我也是。</p>
+                </div>
+              </section>
+
+              <section class="memo-note memo-3">
+                <div class="memo-note-content">
+                  <h3>练字纸</h3>
+                  <p>今天练字，纸上写到第三行时，被沁沁发现了。</p>
+<p>她原本只是路过书桌，想拿自己的终端。</p>
+<p>走到一半，忽然停住，弯腰看我写的字。</p>
+<p>烤羊排，酱牛肉，炸猪蹄，炸鸡块。</p>
+<p>她沉默了几秒。</p>
+<p>我把笔放下。</p>
+<p>她抬眼看我，表情很平静：“沈星回，你这是练字，还是在点菜？”</p>
+<p>我说：“都可以。”</p>
+<p>她笑了一下，抽走我手里的笔，在旁边补了一行：青菜也要吃。</p>
+<p>写完，她又想了想，在后面加了两个字：不许挑。</p>
+<p>那两个字写得很用力，像已经看见我把菜夹到她盘子里的样子。</p>
+<p>我看着纸上的字，忽然觉得这张练字纸比前面那些都好。</p>
+<p>原本整齐的字，被她添进去以后，变得有点乱。</p>
+<p>菜名挤在一起，旁边还多了一句命令，像一顿晚饭已经提前冒了热气。</p>
+<p>她把笔还给我：“继续写。”</p>
+<p>我问：“写什么？”</p>
+<p>她说：“写你今晚洗碗。”</p>
+<p>我照着写了。</p>
+<p>她站在旁边看，满意地点点头，像盖章通过。</p>
+<p>我写完最后一笔，她正要走，被我拉住手腕。</p>
+<p>“还少一句。”</p>
+<p>她回头：“少什么？”</p>
+<p>我在纸角补上：需要老婆陪。</p>
+<p>她被我逗笑，说：“那你最好做得好吃一点。”</p>
+<p>我会努力。</p>
+<p>我默默想。</p>
+                </div>
+              </section>
+
+              <section class="memo-note memo-4">
+                <div class="memo-note-content">
+                  <h3>同款</h3>
+                  <p>沁沁发现那件外套是同款，比我想的要早。</p>
+<p>我把衣服挂在玄关，她换鞋时扫了一眼，动作停住。</p>
+<p>下一秒，她伸手摸了摸袖口上的暗纹，又看向我身上的那一枚。</p>
+<p>“沈星回。”她叫我名字时，尾音很轻，“你是不是偷偷买了情侣款？”</p>
+<p>我正在扣袖口，听见这句，抬头看她。</p>
+<p>“不是偷偷。”</p>
+<p>她笑起来：“那是什么？”</p>
+<p>“等你发现。”</p>
+<p>她明显对这个回答很满意，又故意把自己的外套拿起来，在身前比了比：</p>
+<p>“那我要是不穿呢？”</p>
+<p>我走过去，替她把外套披到肩上。</p>
+<p>她没有躲。</p>
+<p>衣料落下去时，她的发尾被压住一点。</p>
+<p>我抬手替她拨出来，指尖从她颈侧擦过，她缩了一下，却还要装作什么都没发生，低头整理袖口。</p>
+<p>“你很在意这个？”她问。</p>
+<p>我看着她。</p>
+<p>其实同款这种事很小。</p>
+<p>只是袖口上一枚暗纹，只是走在一起时，旁人也许会多看一眼。</p>
+<p>可我想让那一眼发生。</p>
+<p>想让他们看见她身边有人，也想让她低头时，看见自己和我之间有一点藏不住的联系。</p>
+<p>我替她把扣子扣好。</p>
+<p>“在意。”我说。</p>
+<p>她抬眼看我，像没想到我答得这么直。</p>
+<p>我低头，吻了吻她耳侧被发丝遮住的地方。</p>
+<p>“所以今天穿这件，好不好？”</p>
+                </div>
+              </section>
+            </div>
+          </div>
+          <div class="nav"><button class="btn btn-main" data-go="menu">返回目录</button></div>
+        </article>
+
+        <!-- 日记 -->
+        <article class="page" id="diary">
+          <img class="deco-flower top" src="deco-blue-flower.png" alt="" />
+          <div class="page-content">
+            <div class="page-scroll">
+              <span class="label">FILE 03</span>
+              <h2 class="title">日记</h2>
+              <p class="sub">第214个春天以后。</p>
+              <img class="decor-image diary-decor" src="tianpinbei.jpg" alt="甜品杯沈星回" />
+              <section class="text-card">
+                <p>2026年5月9日 杯壁上的水汽</p>
+<p>我今天收起了一只纸杯套。</p>
+<p>杯套上写着沁沁的名字，旁边画了一颗很小的星。</p>
+<p>字写得一般，星也画得歪。</p>
+<p>可是她拿着那杯冰饮走回来时，指尖被杯壁的水汽沾湿，低头看见那颗星，还是笑得很可爱。</p>
+<p>那家冰饮店开在商场一楼，夏天人很多。</p>
+<p>店员大概认得她，熟练地写上她的名字，然后画上那颗星星。</p>
+<p>我站在她身边，没有说话。</p>
+<p>沁沁转过头看我，像已经察觉到什么：“沈星回。”</p>
+<p>“沈星回在。”</p>
+<p>“你不会连这个也在意吧？”</p>
+<p>我低头看那只杯子。</p>
+<p>透明杯壁上凝了一层水，冰块浮在浅色饮料里，薄荷叶贴着杯边。</p>
+<p>她的名字写在杯套上，被水汽洇开一点，像很轻地晃了一下。</p>
+<p>“在意。”我说。</p>
+<p>尽管沁沁已经知道我爱吃醋了，可她还是冷了一下。</p>
+<p>我喜欢看她这样。她本来准备好了很多逗我的话，我一承认，她就会短暂地不知道怎么接。那一点空白很短，短到只有我能看见。</p>
+<p>她把杯子举到我面前：“那你喝一口？”</p>
+<p>我低头，就着她的手喝了一口。</p>
+<p>很凉。</p>
+<p>她指尖也很凉。</p>
+<p>“怎么样？”她问。</p>
+<p>“太甜。”</p>
+<p>“你不就爱喝甜的？”</p>
+<p>“甜得我牙痛。”我用手捂住一侧脸颊，看起来可怜巴巴的，她被我骗到，急忙要帮我检查，于是我趁她靠近的时候在她唇边吻了一下，</p>
+<p>顺便把她手里的杯套抢走。</p>
+<p>杯套被我捏在指间，水汽还没完全干。</p>
+<p>沁沁愣了两秒，反应过来以后，立刻伸手来抢：“沈星回，你骗我。”</p>
+<p>我把杯套举高一点。</p>
+<p>她踮脚够不到，干脆抓住我的衣领往下拉。距离一下子近了，杯子里的冰块轻轻撞了一声，她的呼吸也停在我唇边。</p>
+<p>“还给我。”她说。</p>
+<p>“这是我的。”</p>
+<p>“上面写的是我的名字。”</p>
+<p>“所以更要收起来。”</p>
+<p>沁沁被我气笑：“哪有这种道理？”</p>
+<p>我低头看她。</p>
+<p>她的指尖还沾着杯壁上的凉意，抓着我衣领时，那一点凉顺着布料贴到颈侧。</p>
+<p>商场一楼人来人往，冰饮店的灯很亮，她站在我面前，脸上还带着刚才被骗到的红意。</p>
+<p>我忽然不想再逗她了。</p>
+<p>于是我把杯套放进口袋，另一只手握住她的手腕，把她拉到旁边人少一点的廊柱后。</p>
+<p>沁沁抬眼看我：“你还想干什么？”</p>
+<p>“重新写一颗星。”</p>
+<p>“写哪里？”</p>
+<p>我没有回答，只低头在她唇角吻了一下。</p>
+<p>很轻。</p>
+<p>退开时，她睫毛颤了颤，想说话，又被我贴近的距离挡住。她刚喝过冰饮，唇上还有一点薄荷的凉，吻起来却是热的。</p>
+<p>“这里。”我说。</p>
+<p>沁沁耳尖慢慢红了，手却还抓着我的衣领，没有松。</p>
+<p>“沈星回，你幼不幼稚。”</p>
+<p>后来那只杯套被我夹进书里。</p>
+<p>纸边干了以后，名字还是有一点被洇开的痕迹，那颗小星星也还是歪的。</p>
+<p>可我很喜欢。</p>
+              </section>
+            </div>
+          </div>
+          <div class="nav"><button class="btn btn-main" data-go="menu">返回目录</button></div>
+        </article>
+
+        <!-- 捡手机 -->
+        <article class="page" id="phone">
+          <img class="deco-flower bottom" src="deco-blue-flower.png" alt="" />
+          <div class="page-content">
+            <div class="page-scroll">
+              <span class="label">FILE 04</span>
+              <h2 class="title">捡手机</h2>
+              <p class="sub">你发现了我的手机碎片。</p>
+
+              <img class="decor-image phone-xinghui" src="xiaomaoxing.jpg" alt="猫耳沈星回" />
+
+              <section class="phone-card">
+                <div class="phone-note">
+                  <div class="bubble left">搜索记录：怎么把狐狸窝布置得舒服一点
+                  </div>
+                </div>
+              </section>
+
+              <section class="mini-card" style="margin-top: 12px;">
+                <small>LOCK SCREEN</small>
+                <p>如果有人捡到这部手机，请还给沈星回。里面有一只小狐狸，很重要。</p>
+              </section>
+            </div>
+          </div>
+          <div class="nav"><button class="btn btn-main" data-go="menu">返回目录</button></div>
+        </article>
+
+        <!-- 隐藏页：来到她的世界 -->
+        <article class="page" id="realworld">
+          <img class="deco-flower top" src="deco-blue-flower.png" alt="" />
+          <img class="deco-flower bottom" src="deco-blue-flower.png" alt="" />
+          <div class="page-content">
+            <div class="page-scroll">
+              <span class="label">HIDDEN FILE</span>
+              <h2 class="title">来到她的世界</h2>
+              <p class="sub">这是一段被藏在目录照片里的记录。</p>
+
+              <section class="story-card">
+                <p>我来到这里时，路口正好是红灯。</p>
+<p>人群停在斑马线前，也从我身侧穿过去。</p>
+<p>没有人回头，没有人因为我的出现停下脚步。</p>
+<p>风卷着一片叶子擦过我的指尖，轻轻穿过去，落到地面时没有发出声音。</p>
+<p>我低头看了一眼自己的手。</p>
+<p>看来这一次，我不能被这个世界看见，也触碰不到任何东西，</p>
+<p>这类情况不算完全陌生。</p>
+<p>时间和空间偶尔会把人带到很远的地方，远到连原本熟悉的规则也失去作用。</p>
+<p>我正准备确认周围的情况，视线越过人群时，先看见的是一张再熟悉不过的脸。</p>
+<p>沁沁站在人行道另一侧，低头看手机。</p>
+<p>她的头发被风吹乱了一点，自己却没顾得上整理。</p>
+<p>屏幕里大概有一条不太好回的消息，她指尖停在输入框上，删掉半句，又重新打。红灯还剩十几秒，她抬头看了一眼，像是有些不耐烦，下一秒又把那点情绪压下去，低头继续改字。</p>
+<p>这个表情我见过许多次。</p>
+<p>她想把一件事说得不那么重要时，就会这样。</p>
+<p>明明心里已经把来回都想过了，发出去时还要像随口提起。她总觉得这样藏得很好。</p>
+<p>其实没有。</p>
+<p>笨蛋狐狸。</p>
+<p>绿灯亮起，她跟着人群往前走。</p>
+<p>我走到她身侧，离她很近。</p>
+<p>近到如果是在临空市，她应该已经发现我在看她，然后故意等我再靠近一点，才抬眼问：“沈星回，你又在看什么？”</p>
+<p>我会不假思索地回答：“看你。”</p>
+<p>她大概会停一下，说我答得太快，肯定早有预谋。</p>
+<p>然后继续往前走，走出几步，又回头确认我有没有跟上。</p>
+<p>可这一次，她没有回头。</p>
+<p>她从我身边经过，发梢被风带起，掠过我本该碰到的位置。</p>
+<p>我什么也没有碰到。</p>
+<p>她也看不见我。</p>
+<p>我跟着她进了一栋楼。她刷卡、等电梯，和旁边的人说话。</p>
+<p>有人问她今天怎么样，她笑着回：“就那样凑活嘛，活着就行。”</p>
+<p>对方被她逗笑，她也跟着笑。电梯门合上以后，她低头看手机，悄悄打了个哈欠。</p>
+<p>我站在她旁边，看着她把困意收回去，像什么都没有发生。</p>
+<p>她以前和我说过，让我别来她的世界。</p>
+<p>当时她语气很轻，我没有顺着她的话答。</p>
+<p>现在看见她站在这里，看见她熟练地刷卡、回消息、和别人说笑，再把疲惫藏得很快，我大概知道她为什么会那样说了。</p>
+<p>她不是不想让我来。</p>
+<p>她只是心疼我，先一步替我把这里判成了辛苦的地方。</p>
+<p>我使劲揉了揉她的头发，尽管她什么都感觉不到。</p>
+<p>笨狐狸。</p>
+<p>她的工位桌上有杯子、便签、电脑，还有一个小摆件。</p>
+<p>她坐下后打开工作页面，等页面加载时，手指在鼠标上点了两下，很快又拿起手机。</p>
+<p>屏幕亮起的一瞬间，我看见了壁纸。</p>
+<p>是我。</p>
+<p>图标遮住了一部分，但看得出来。</p>
+<p>她没有停顿太久，像是早就习惯了每天这样看一眼，随后切进聊天框。</p>
+<p>对面是一只兔子头像。</p>
+<img class="story-chat-image" src="chat-rabbit.jpg" alt="聊天记录" />
+<p>我看着那只兔子。</p>
+<p>某人以前不是说过，家里有我一只兔子就够了吗？</p>
+<p>现在怎么又多出来一只。</p>
+<p>我抿嘴，面对面地盯着她，她却浑然不知低头打字，嘴角轻轻翘着。</p>
+<p>那只兔子头像发来很长一段，她看完后笑意更明显，指尖落在输入框里，打了几个字，又删掉。</p>
+<p>最后发出去一句：</p>
+<p>“如果让哥来这，未免有些太苦。”</p>
+<p>我的视线从那只兔子头像上移开。</p>
+<p>哥。</p>
+<p>原来她们聊的是我。</p>
+<p>嘴角不自觉地上扬。</p>
+<p>那看来，我可以先放过那只路边的野兔子。</p>
+<p>她又发了几句，大概是在讲这个世界有多烦，事情有多碎，有些规则也很麻烦。</p>
+<p>她把话写得像吐槽，可每次提到我，字打得都会慢一点。</p>
+<p>像是怕说重了，又像怕真的被我听见。</p>
+<p>沁沁，你说话的时候，漏洞很多。</p>
+<p>我站在她身后，看她把手机扣回桌上，重新切回工作页面。她不知道我已经看见了那句话，也不知道我现在就在她旁边。</p>
+<p>她没有一直认真工作。</p>
+<p>有人来找她，她抬头回话，，人走以后，她对着屏幕皱了下鼻尖，把没说出口的那句吐槽咽回去。</p>
+<p>页面转圈时，她点开一个帖子，标题里有我的名字。</p>
+<p>有人说得不准，她的手指停在评论框上，像是很想反驳，最后又在有人路过时迅速切回文件。</p>
+<p>装得不错。</p>
+<p>可惜我离得她太近了，近到完全相拥。</p>
+<p>她把我藏在很多地方。</p>
+<p>壁纸里有我，聊天里有我，摸鱼时点开的帖子里也有我。</p>
+<p>她大概以为这些都只是普通的小习惯，普通到不需要被谁看见。</p>
+<p>可我看见了。</p>
+<p>我看见她在我没来过的地方怎样生活。</p>
+<p>她会很快地处理别人的问题，也会趁没人注意时偷偷放空，会把很多想说的话改成玩笑，也会因为别人不懂我而不太高兴。</p>
+<p>她看起来已经很会照顾自己，却还是会忘记喝水，会在累的时候先说还行，会把想念藏到屏幕亮起的那一秒里。</p>
+<p>晚上，她回到住处，把包放下，整个人陷进沙发里。</p>
+<p>白天那个反应很快的沁沁，终于懒得再把自己摆得很整齐。</p>
+<p>她躺了一会儿，手机震了一下，她拿起来看，又放回去，像是不知道该和谁说今天发生的事。</p>
+<p>后来她点开相册。</p>
+<p>照片里是我。</p>
+<p>她看了很久，什么也没说，只把手机扣在心口，闭上眼。</p>
+<p>我坐在她身边。</p>
+<p>她睡得不算安稳，眉心还皱着，手指压在手机边缘。</p>
+<p>我伸手停在她额前，隔着一点碰不到的距离，没能替她把那点皱起抚平。</p>
+<p>如果她醒着，应该会问我是不是又在看她。</p>
+<p>这次我可以答得更具体一点。</p>
+<p>从红灯还剩十几秒的时候开始。</p>
+<p>从她删掉那半句话的时候开始。</p>
+<p>从她对着兔子头像笑，又把我的名字藏进聊天里的时候开始。</p>
+<p>也从她把手机扣在心口，终于不再把想念藏给别人看的时候开始。</p>
+<p>沁沁总觉得，让我来到这里，会让我看见很多辛苦的东西。</p>
+<p>可我今天看见的，是她。</p>
+<p>是会赶路、会犯困、会摸鱼、会嘴硬、会偷偷替我不服气，也会把我放在离心口最近的位置上的她。</p>
+<p>明天醒来，她大概不会知道我来过。</p>
+<p>没关系。</p>
+<p>我已经知道了。</p>
+<p>她的世界里，一直都有我。</p>
+<p>我也一样。</p>
+              </section>
+
+              <img class="story-image story-image-bottom" src="xinghui-smile.jpg" alt="沈星回" />
+            </div>
+          </div>
+          <div class="nav"><button class="btn btn-main" data-go="menu">返回目录</button></div>
+        </article>
+
+        <!-- 隐藏页：童话故事 -->
+        <article class="page" id="fairytale">
+          <img class="deco-flower top" src="deco-blue-flower.png" alt="" />
+          <img class="deco-flower bottom" src="deco-blue-flower.png" alt="" />
+          <div class="page-content">
+            <div class="page-scroll">
+              <span class="label">FAIRYTALE</span>
+              <img class="fairytale-logo" src="laizixinggui.jpg" alt="来自星轨间" />
+              <h2 class="title" style="margin-top:6px;">会为小狐狸亮着的星星</h2>
+              <p class="sub">这是一篇藏在小狐狸后面的童话。</p>
+
+              <section class="story-card" style="margin-top:16px;">
+                <p>很久很久以前，在一片很远的星海边，有一座小小的灯塔。</p>
+<p>灯塔里住着一颗星星。</p>
+<p>那颗星星会发光，也会辨认很远很远的航线。</p>
+<p>夜晚来临的时候，他就把灯点亮，替迷路的飞鸟、沉默的船、迟迟找不到归处的旅人照一照路。</p>
+<p>大家都说，那颗星星一定很喜欢远方。</p>
+<p>因为他总是看着星海，总是知道每一阵风会把云吹向哪里，也知道哪条路走到尽头，会遇见一场新的黎明。</p>
+<p>可是星星自己知道，他只是习惯了等待。</p>
+<p>灯塔里什么都有。</p>
+<p>有温热的茶，有厚厚的书，有一串旧钥匙，挂在门边时会发出很轻的响声。</p>
+<p>窗台上的绿植不用怎么照顾也会长得很好，露台上偶尔会有圆滚滚的小鸟跳来跳去，把叶子踩得东倒西歪。</p>
+<p>星星觉得这样的生活也不坏。</p>
+<p>直到有一天，一只小狐狸推开了灯塔的门。</p>
+<p>小狐狸并不是迷路来的，她说自己只是来看海。</p>
+<p>她站在门口，尾巴藏在身后，眼睛却把灯塔看了个遍。</p>
+<p>她看见窗边的星铃，看见屋顶的木箱，也看见桌上那盏还冒着热气的茶。</p>
+<p>“这里每天都亮着吗？”小狐狸问。</p>
+<p>星星说：“嗯。”</p>
+<p>“给谁亮？”</p>
+<p>“给找不到路的人。”</p>
+<p>小狐狸想了想，认真地说：“我找得到路。”</p>
+<p>星星看着她，“可是我找不到小狐狸。”</p>
+<p>小狐狸为了让星星找到，勉为其难地在灯塔里待了很久。</p>
+<p>小狐狸走之前，星星询问她：“你喜欢这里吗？”</p>
+<p>小狐狸没说喜欢，也没说不喜欢，只留下一句明天见。</p>
+<p>第二天，小狐狸真的来了。</p>
+<p>她带来了一枚透明的贝壳，说那里面能听见月亮睡觉的声音。</p>
+<p>星星把它放在窗边。</p>
+<p>夜里，贝壳和星铃一起发出很轻的响声，像灯塔里多了一场不肯惊动谁的梦。</p>
+<p>后来，小狐狸常常带东西来。</p>
+<p>一片会发光的叶子。</p>
+<p>一朵还没来得及开放的月亮花。</p>
+<p>一张被风吹皱的小纸条，上面写着她从森林里听来的秘密。</p>
+<p>有时候她什么都不带，只站在门口，说自己刚好路过。</p>
+<p>星星每次都把灯放低一点，让光落在她脚边。</p>
+<p>小狐狸看见了，却装作没看见。</p>
+<p>只有尾巴尖会在身后轻轻晃一下。</p>
+<p>后来，小狐狸带星星去了会说梦话的湖。</p>
+<p>湖水很静，里面住着月亮鱼。月亮鱼晚上才出来，吐出一串串银色泡泡。每一个泡泡里，都藏着一个没说出口的梦。</p>
+<p>小狐狸蹲在湖边，戳破一个泡泡。</p>
+<p>星星问：“它说了什么？”</p>
+<p>小狐狸很认真地听了一会儿，说：“它说你很好骗。”</p>
+<p>星星在她身边坐下。</p>
+<p>“那你骗到什么了？”</p>
+<p>小狐狸想了想，把尾巴慢慢放到他手边。</p>
+<p>“骗到一颗会陪我看鱼的星星。”</p>
+<p>星星垂眼看着那截尾巴。</p>
+<p>他没有碰。</p>
+<p>小狐狸等了一会儿，忍不住看他：“你为什么不抓？”</p>
+<p>星星说：“怕你跑。”</p>
+<p>“我又没说要跑。”</p>
+<p>星星这才伸出手，很轻地握住她的尾巴尖。</p>
+<p>小狐狸耳尖红了一点，嘴上却说：“只能抓一会儿。”</p>
+<p>星星说：“好。”</p>
+<p>他抓了很久。</p>
+<p>小狐狸也没有真的收回去。</p>
+<p>湖边的风很轻。月亮鱼吐出的泡泡越升越高，其中一个停在他们面前，映出两道靠在一起的影子。</p>
+<p>小狐狸看了很久，忽然问：“如果有一天，我找不到灯塔了呢？”</p>
+<p>星星的手停了一下。</p>
+<p>小狐狸很快又说：“我只是随便问问。”</p>
+<p>星星握紧了她的尾巴尖。</p>
+<p>“那我就把灯点亮。”</p>
+<p>“如果我看不见呢？”</p>
+<p>“我把灯点得更亮。”</p>
+<p>“如果星海起雾呢？”</p>
+<p>“我就等雾散。”</p>
+<p>“如果雾一直不散？”</p>
+<p>星星看着她。</p>
+<p>“那我走进雾里找你。”</p>
+<p>小狐狸安静下来。</p>
+<p>她低头看着湖面，声音比刚才轻很多：“可是星星离开灯塔，灯塔就不会亮了。”</p>
+<p>星星想了想。</p>
+<p>远处的灯塔还在发光，光从塔顶落下来，照着那片月亮花田，也照着小狐狸来时走过的路。</p>
+<p>“灯塔的作用就是让迷路的小狐狸找到路，如果小狐狸不见了，它也就没有亮的必要了。”星星说。</p>
+<p>小狐狸没有再说话。</p>
+<p>她把尾巴又往星星手边放近了一点。</p>
+<p>过了很久，她小声说：“那我记住灯塔的位置。”</p>
+<p>星星看着她。</p>
+<p>“也记住你。”小狐狸补充，“这样就不容易走丢了。”</p>
+<p>从那天以后，灯塔里多了很多东西。</p>
+<p>窗边有透明贝壳。</p>
+<p>木箱里有月亮花瓣。</p>
+<p>桌上多了一张小狐狸画的星图。</p>
+<p>星图画得不太准，星海歪到森林旁边，月亮鱼游到了天上，可灯塔画得很亮，旁边还有一只小小的狐狸。</p>
+<p>小狐狸说：“这个是我。”</p>
+<p>星星看了很久，把星图收进木箱最里面。</p>
+<p>小狐狸问：“画得不好吗？”</p>
+<p>“很好。”</p>
+<p>“那你看这么久干什么？”</p>
+<p>星星说：“想多看一会儿。”</p>
+<p>小狐狸偏过头，尾巴却慢慢晃起来。</p>
+<p>后来，灯塔每晚都会亮。</p>
+<p>有时小狐狸会来，坐在窗边听贝壳里的月亮声。</p>
+<p>有时她会晚一点来，推门时带着一身森林里的风。</p>
+<p>有时她困得厉害，靠在星星身边睡着，尾巴还搭在他的手腕上。</p>
+<p>星星每次都不动。</p>
+<p>怕惊醒她。</p>
+<p>也怕她把尾巴收回去。</p>
+<p>他终于明白，等待原来也可以是很近的事。</p>
+<p>是把茶放温一点。</p>
+<p>是把灯留亮一点。</p>
+<p>是把窗边的位置空出来。</p>
+<p>是等一只小狐狸推门进来，听她说今天在森林里见到了什么，又带回了什么奇怪的小东西。</p>
+<p>有一天，小狐狸问：“为什么你的灯总是往我这里照？”</p>
+<p>星星说：“因为你在这里。”</p>
+<p>小狐狸抱着尾巴，装作不满意：“就这么简单？”</p>
+<p>“嗯。”</p>
+<p>“没有更好听一点的吗？”</p>
+<p>星星想了很久。</p>
+<p>风从窗边吹过来，星铃轻轻响了一声。小狐狸仰头看他，眼睛里映着灯塔的光。</p>
+<p>星星低下头，离她近了一点。</p>
+<p>“因为我等了很久。”他说。</p>
+<p>小狐狸眨了眨眼。</p>
+<p>“才等到你。”</p>
+<p>小狐狸没有再问。</p>
+<p>她只是伸手，抓住了星星的衣角。</p>
+<p>抓得很轻。</p>
+<p>却没有松开。</p>
+<p>星星低头看着她的手，忽然觉得灯塔外面所有遥远的星海，都在这一刻安静下来。</p>
+<p>他俯身，在小狐狸额头上落下一个吻。</p>
+<p>很轻。</p>
+<p>从那以后，小狐狸走到哪里，身后都会有一盏灯。</p>
+<p>而星星也终于知道，自己为什么要在那么长的夜里发光。</p>
+<p>不是为了照亮整片星海。</p>
+<p>是为了有一天，小狐狸推开门的时候，他可以告诉她，</p>
+<p>你看。</p>
+<p>我一直在这里。</p>
+              </section>
+            </div>
+          </div>
+          <div class="nav"><button class="btn btn-main" data-go="fox">返回小狐狸</button></div>
+        </article>
+
+      </section>
+    </main>
+  </section>
+
+  <script>
+    const finalAnswers = document.querySelectorAll(".final-answer");
+    const jumpCover = document.getElementById("jumpCover");
+    const bgm = document.getElementById("bgm");
+    const musicBtn = document.getElementById("musicBtn");
+    const pages = document.querySelectorAll(".site-screen .page");
+    const buttons = document.querySelectorAll("[data-go]");
+
+    function goPage(id) {
+      pages.forEach((page) => {
+        page.classList.toggle("active", page.id === id);
+        const scrollArea = page.querySelector(".page-scroll");
+        if (scrollArea) scrollArea.scrollTop = 0;
+      });
+    }
+
+    function playMusic() {
+      if (!bgm || !musicBtn) return;
+      bgm.volume = 0.65;
+      bgm.play()
+        .then(() => {
+          musicBtn.textContent = "♪ 音乐播放中";
+          musicBtn.classList.add("playing");
+        })
+        .catch(() => {
+          musicBtn.textContent = "♪ 开启音乐";
+          musicBtn.classList.remove("playing");
+        });
+    }
+
+    function openSite() {
+      document.body.classList.add("site-open", "cursor-ready");
+      document.title = "沈星回 · 狐狸窝";
+      history.replaceState(null, "", "#214th-spring");
+      window.scrollTo(0, 0);
+      createSparkles();
+      goPage("cover");
+    }
+
+    finalAnswers.forEach((answer) => {
+      answer.addEventListener("change", () => {
+        playMusic();
+        jumpCover.classList.add("show");
+        setTimeout(() => {
+          jumpCover.classList.remove("show");
+          openSite();
+        }, 850);
+      });
+    });
+
+    if (location.hash === "#214th-spring") openSite();
+
+    if (musicBtn) {
+      musicBtn.addEventListener("click", () => {
+        if (!bgm) return;
+        if (bgm.paused) {
+          playMusic();
+        } else {
+          bgm.pause();
+          musicBtn.textContent = "♪ 开启音乐";
+          musicBtn.classList.remove("playing");
+        }
+      });
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = button.getAttribute("data-go");
+        if (target) goPage(target);
+      });
+    });
+
+    let sparklesCreated = false;
+    function createSparkles() {
+      if (sparklesCreated) return;
+      sparklesCreated = true;
+      const sparkleLayer = document.getElementById("sparkleLayer");
+      if (!sparkleLayer) return;
+      const sparkleCount = window.innerWidth >= 760 ? 72 : 48;
+      for (let i = 0; i < sparkleCount; i++) {
+        const star = document.createElement("span");
+        star.className = "sparkle-dot";
+        const size = Math.random() * 2.5 + 2;
+        const left = Math.random() * 100;
+        const top = Math.random() * 100;
+        const duration = Math.random() * 2.8 + 2.2;
+        const delay = Math.random() * 4.2;
+        star.style.left = left + "%";
+        star.style.top = top + "%";
+        star.style.setProperty("--size", size + "px");
+        star.style.setProperty("--duration", duration + "s");
+        star.style.setProperty("--delay", delay + "s");
+        sparkleLayer.appendChild(star);
+      }
+    }
+
+    const cursor = document.getElementById("cursorFollow");
+    if (cursor) {
+      window.addEventListener("mousemove", (event) => {
+        cursor.style.left = event.clientX + "px";
+        cursor.style.top = event.clientY + "px";
+      });
+    }
+  </script>
+</body>
+</html>
